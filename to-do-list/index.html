@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a4a4a;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #todo-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        #todo-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .add-button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+
+        .add-button:hover {
+            background: #764ba2;
+        }
+
+        .todo-list {
+            list-style: none;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .todo-item.completed {
+            background: #e8e8e8;
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .todo-text {
+            flex: 1;
+            margin: 0 15px;
+        }
+
+        .delete-btn {
+            padding: 8px 12px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #ff5252;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .input-section {
+                flex-direction: column;
+            }
+
+            .add-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Todo List</h1>
+        <div class="input-section">
+            <input type="text" id="todo-input" placeholder="Add a new task...">
+            <button class="add-button">Add</button>
+        </div>
+        <ul class="todo-list"></ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const todoInput = document.getElementById('todo-input');
+            const addButton = document.querySelector('.add-button');
+            const todoList = document.querySelector('.todo-list');
+
+            // Load todos from localStorage
+            let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+            function saveTodos() {
+                localStorage.setItem('todos', JSON.stringify(todos));
+            }
+
+            function renderTodos() {
+                todoList.innerHTML = '';
+                todos.forEach((todo, index) => {
+                    const li = document.createElement('li');
+                    li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+                    li.innerHTML = `
+                        <input type="checkbox" ${todo.completed ? 'checked' : ''}>
+                        <span class="todo-text">${todo.text}</span>
+                        <button class="delete-btn">Delete</button>
+                    `;
+
+                    const checkbox = li.querySelector('input');
+                    checkbox.addEventListener('change', () => toggleTodo(index));
+
+                    const deleteBtn = li.querySelector('.delete-btn');
+                    deleteBtn.addEventListener('click', () => deleteTodo(index));
+
+                    todoList.appendChild(li);
+                });
+            }
+
+            function addTodo() {
+                const text = todoInput.value.trim();
+                if (text) {
+                    todos.push({ text, completed: false });
+                    saveTodos();
+                    renderTodos();
+                    todoInput.value = '';
+                }
+            }
+
+            function toggleTodo(index) {
+                todos[index].completed = !todos[index].completed;
+                saveTodos();
+                renderTodos();
+            }
+
+            function deleteTodo(index) {
+                todos.splice(index, 1);
+                saveTodos();
+                renderTodos();
+            }
+
+            addButton.addEventListener('click', addTodo);
+            todoInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addTodo();
+                }
+            });
+
+            // Initial render
+            renderTodos();
+        });
+    </script>
+</body>
+</html>
